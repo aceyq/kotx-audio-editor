@@ -4,19 +4,24 @@
   <meta charset="UTF-8">
   <title>Upload Audio</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 50px; background: #f8f5ff; }
+    body { font-family: 'Poppins', sans-serif; text-align: center; padding: 50px; background: #f8f5ff; }
     h1 { color: #7d3cff; }
     input[type="file"] { margin: 20px; }
-    button { background: #7d3cff; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+    button { 
+      background: #7d3cff; color: white; padding: 10px 20px; 
+      border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;
+    }
     button:hover { background: #5c29c9; }
     p.error { color: red; }
   </style>
 </head>
 <body>
   <h1>Upload an MP3 to Edit 🎵</h1>
+  
   {% if error %}
     <p class="error">{{ error }}</p>
   {% endif %}
+  
   <form method="post" enctype="multipart/form-data">
     <input type="file" name="file" accept=".mp3" required>
     <br>

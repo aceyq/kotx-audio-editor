@@ -1,14 +1,19 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, send_from_directory, redirect, url_for
 import os
 from werkzeug.utils import secure_filename
 from editor import edit_audio
 
+# Folders
+UPLOAD_FOLDER = "uploads"
+PROCESSED_FOLDER = "processed"
+
 app = Flask(__name__)
 
-# Ensure uploads folder exists
-UPLOAD_FOLDER = "uploads"
+# Ensure folders exist
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+if not os.path.exists(PROCESSED_FOLDER):
+    os.makedirs(PROCESSED_FOLDER)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
