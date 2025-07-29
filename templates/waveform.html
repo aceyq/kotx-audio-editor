@@ -37,6 +37,7 @@
 
   <p>Start: <span id="startDisplay">0</span>s | End: <span id="endDisplay">0</span>s</p>
 
+  <!-- Form sends crop info + filename -->
   <form method="post" action="/process" id="processForm">
     <input type="hidden" name="start" id="start">
     <input type="hidden" name="end" id="end">
@@ -50,13 +51,13 @@
     import WaveSurfer from 'https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.esm.js'
     import RegionsPlugin from 'https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.esm.js'
 
-    // Setup wavesurfer
+    // Setup wavesurfer with the audio file passed from Flask
     const regions = RegionsPlugin.create()
     const wavesurfer = WaveSurfer.create({
       container: '#waveform',
       waveColor: 'violet',
       progressColor: '#7d3cff',
-      url: "{{ mp3_file }}",  // audio file from Flask
+      url: "{{ mp3_file }}",  // Flask passes the audio file path here
       plugins: [regions]
     })
 
@@ -94,7 +95,7 @@
       wavesurfer.playPause()
     })
 
-    // Update values in UI + form inputs
+    // Update form + display values
     function update(start, end) {
       document.getElementById('start').value = start
       document.getElementById('end').value = end
@@ -102,14 +103,13 @@
       document.getElementById('endDisplay').innerText = end.toFixed(2)
     }
 
-    // Validate before form submission
+    // Validate before submitting
     document.getElementById('processForm').addEventListener('submit', (e) => {
       if (!region) {
         alert("Please select a region first!")
         e.preventDefault()
         return
       }
-      // ensure latest region values are saved
       update(region.start, region.end)
     })
   </script>
