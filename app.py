@@ -14,15 +14,15 @@ if not os.path.exists(UPLOAD_FOLDER):
 def index():
     if request.method == "POST":
         file = request.files.get("file")
-        if not file:
-            return render_template("index.html", error="Please upload an MP3 file")
+        if not file or file.filename == "":
+            return render_template("index.html", error="Please upload a valid MP3 file")
 
-        # Save uploaded file securely
+        # Save file
         filename = secure_filename(file.filename)
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         file.save(file_path)
 
-        # Go to waveform page with the uploaded file
+        # Pass the uploaded MP3 path and filename to the cutting screen (waveform.html)
         return render_template("waveform.html", mp3_file=file_path, filename=filename)
 
     return render_template("index.html")
