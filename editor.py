@@ -1,8 +1,7 @@
-from pydub import AudioSegment #library for editing audio
-#this class lets you slice, fade, and export 
+from pydub import AudioSegment
 from pydub.utils import which
 
-# Force pydub to use ffmpeg explicitly
+# force ffmpeg instead of pyaudioop
 AudioSegment.converter = which("ffmpeg")
 
 
