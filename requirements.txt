@@ -1,1 +1,4 @@
-Flask\nyt-dlp\npydub\ngunicorn
+Flask
+yt-dlp
+pydub
+gunicorn
