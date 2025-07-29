@@ -1,36 +1,36 @@
-from flask import Flask, render_template, request, send_file, send_from_directory, redirect, url_for
+from flask import Flask, render_template, request, send_file, send_from_directory
 import os
 from werkzeug.utils import secure_filename
 from editor import edit_audio
 
-# Folders
 UPLOAD_FOLDER = "uploads"
-PROCESSED_FOLDER = "processed"
-
 app = Flask(__name__)
 
-# Ensure folders exist
+# Ensure uploads folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-if not os.path.exists(PROCESSED_FOLDER):
-    os.makedirs(PROCESSED_FOLDER)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        file = request.files.get("file")
+        file = request.files["file"]
         if not file or file.filename == "":
-            return render_template("index.html", error="Please upload a valid MP3 file")
+            return render_template("index.html", error="Please upload a valid MP3")
 
-        # Save file
         filename = secure_filename(file.filename)
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         file.save(file_path)
 
-        # Pass the uploaded MP3 path and filename to the cutting screen (waveform.html)
-        return render_template("waveform.html", mp3_file=file_path, filename=filename)
+        # Pass a PUBLIC URL to waveform.html
+        mp3_url = f"/uploads/{filename}"
+        return render_template("waveform.html", mp3_file=mp3_url, filename=filename)
 
     return render_template("index.html")
+
+
+@app.route("/uploads/<filename>")
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 
 @app.route("/process", methods=["POST"])
