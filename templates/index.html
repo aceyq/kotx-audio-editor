@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Random Play Dance Audio Editor</title>
+    <meta charset="UTF-8">
+    <title>Upload MP3</title>
 </head>
 <body>
-  <h2>Step 1: Paste YouTube Link</h2>
-  <form method="post">
-    <input name="url" placeholder="https://www.youtube.com/..."><br><br>
-    <button type="submit" name="download">Load Audio</button>
-  </form>
+    <h1>Step 1: Upload MP3 File</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="mp3_file" accept=".mp3" required>
+        <button type="submit">Upload</button>
+    </form>
 </body>
 </html>

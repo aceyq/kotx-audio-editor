@@ -5,7 +5,6 @@
   <title>KOTX Random Play Audio Editor</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-
     body {
       font-family: 'Poppins', sans-serif;
       background: #f8f5ff;
@@ -13,54 +12,18 @@
       padding: 20px;
       color: #333;
     }
-
-    h1 {
-      font-size: 2.2rem;
-      color: #7d3cff;
-      margin-bottom: 5px;
-    }
-
-    h2 {
-      font-size: 1.3rem;
-      margin-bottom: 20px;
-    }
-
+    h1 { font-size: 2.2rem; color: #7d3cff; margin-bottom: 5px; }
+    h2 { font-size: 1.3rem; margin-bottom: 20px; }
     #waveform {
-      width: 90%;
-      height: 180px;
-      margin: 0 auto 15px;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 2px solid #7d3cff;
+      width: 90%; height: 180px; margin: 0 auto 15px;
+      border-radius: 8px; overflow: hidden; border: 2px solid #7d3cff;
     }
-
     button {
-      background: #7d3cff;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 16px;
-      margin: 5px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.2s;
+      background: #7d3cff; color: #fff; border: none; border-radius: 6px;
+      padding: 10px 16px; margin: 5px; font-size: 1rem; cursor: pointer; transition: 0.2s;
     }
-
-    button:hover {
-      background: #5c29c9;
-    }
-
-    form {
-      margin-top: 15px;
-    }
-
-    input[type="text"], input[name="fade_in"], input[name="fade_out"] {
-      padding: 6px 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      width: 100px;
-      margin: 5px;
-    }
+    button:hover { background: #5c29c9; }
+    input { margin: 5px; padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -72,16 +35,15 @@
   <button id="playPause">▶ Play / Pause Full Audio</button>
   <button id="playRegion">🎧 Play Selected Region Only</button>
 
-  <p>
-    Start: <span id="startDisplay">0</span>s | End: <span id="endDisplay">0</span>s
-  </p>
+  <p>Start: <span id="startDisplay">0</span>s | End: <span id="endDisplay">0</span>s</p>
 
-  <form method="post">
+  <form method="post" action="/process">
     <input type="hidden" name="start" id="start">
     <input type="hidden" name="end" id="end">
+    <input type="hidden" name="filename" value="{{ filename }}">
     <input name="fade_in" placeholder="Fade-in (ms)" value="2000">
     <input name="fade_out" placeholder="Fade-out (ms)" value="2000"><br><br>
-    <button type="submit" name="process">✨ Process Audio</button>
+    <button type="submit">✨ Process Audio</button>
   </form>
 
   <script type="module">
@@ -93,13 +55,14 @@
       container: '#waveform',
       waveColor: 'violet',
       progressColor: '#7d3cff',
-      url: "{{ audio_file }}",
+      url: "{{ mp3_file }}",   // matches Flask's waveform route
       plugins: [regions]
     })
 
     let region
 
     wavesurfer.on('ready', () => {
+      // Add initial region
       region = regions.addRegion({
         start: 0,
         end: wavesurfer.getDuration(),
@@ -110,6 +73,11 @@
       update(region.start, region.end)
     })
 
+    // Update when created or resized
+    regions.on('region-created', (reg) => {
+      region = reg
+      update(region.start, region.end)
+    })
     regions.on('region-updated', (reg) => {
       region = reg
       update(region.start, region.end)
