@@ -1,29 +1,33 @@
 from pydub import AudioSegment
 from pydub.utils import which
 
-# force ffmpeg instead of pyaudioop
+# Use ffmpeg for audio operations
 AudioSegment.converter = which("ffmpeg")
 
+def edit_audio(input_file, start, end, fade_in_ms=0, fade_out_ms=0, output_file="edited.mp3"):
+    # Convert seconds (from waveform) to milliseconds
+    start_ms = int(float(start) * 1000)
+    end_ms = int(float(end) * 1000)
 
-def edit_audio(input_file, start_ms, end_ms, fade_in_ms = 0, fade_out_ms = 0, output_file="edited.mp3"):
-    #optional fade lengths, default is 0
+    # Load the original audio
     song = AudioSegment.from_mp3(input_file)
-    #loads the MP3 into memory as an AudioSegment object 
-    cut = song[start_ms:end_ms]
-    #trims audio by slicing like a list (e.g. song[10000:30000] is 10s-30s)
 
+    # Crop the audio
+    cut = song[start_ms:end_ms]
+    if len(cut) <= 0:
+        print(f"[ERROR] Cropped audio is empty! Start: {start_ms}, End: {end_ms}, Original length: {len(song)}ms")
+        raise ValueError("Empty cropped audio")
+
+    # Apply fades if specified
     if fade_in_ms:
         cut = cut.fade_in(fade_in_ms)
     if fade_out_ms:
         cut = cut.fade_out(fade_out_ms)
 
-    # Load countdown audio
+    # Load countdown and combine
     countdown = AudioSegment.from_mp3("countdown.mp3")
+    final = countdown + cut
 
-    # Combine countdown + cut audio
-    final = countdown + cut  # '+' concatenates in pydub
-
-    final.export(output_file, format = 'mp3')
+    # Export final file
+    final.export(output_file, format='mp3')
     return output_file
-
-
