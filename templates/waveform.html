@@ -37,7 +37,7 @@
 
   <p>Start: <span id="startDisplay">0</span>s | End: <span id="endDisplay">0</span>s</p>
 
-  <form method="post" action="/process">
+  <form method="post" action="/process" id="processForm">
     <input type="hidden" name="start" id="start">
     <input type="hidden" name="end" id="end">
     <input type="hidden" name="filename" value="{{ filename }}">
@@ -50,19 +50,20 @@
     import WaveSurfer from 'https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.esm.js'
     import RegionsPlugin from 'https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.esm.js'
 
+    // Setup wavesurfer
     const regions = RegionsPlugin.create()
     const wavesurfer = WaveSurfer.create({
       container: '#waveform',
       waveColor: 'violet',
       progressColor: '#7d3cff',
-      url: "{{ mp3_file }}",   // matches Flask's waveform route
+      url: "{{ mp3_file }}",  // audio file from Flask
       plugins: [regions]
     })
 
     let region
 
+    // Add initial region when ready
     wavesurfer.on('ready', () => {
-      // Add initial region
       region = regions.addRegion({
         start: 0,
         end: wavesurfer.getDuration(),
@@ -73,7 +74,7 @@
       update(region.start, region.end)
     })
 
-    // Update when created or resized
+    // Update region when created or resized
     regions.on('region-created', (reg) => {
       region = reg
       update(region.start, region.end)
@@ -83,20 +84,34 @@
       update(region.start, region.end)
     })
 
+    // Play selected region
     document.getElementById('playRegion').addEventListener('click', () => {
       if (region) wavesurfer.play(region.start, region.end)
     })
 
+    // Play/pause full audio
     document.getElementById('playPause').addEventListener('click', () => {
       wavesurfer.playPause()
     })
 
+    // Update values in UI + form inputs
     function update(start, end) {
       document.getElementById('start').value = start
       document.getElementById('end').value = end
       document.getElementById('startDisplay').innerText = start.toFixed(2)
       document.getElementById('endDisplay').innerText = end.toFixed(2)
     }
+
+    // Validate before form submission
+    document.getElementById('processForm').addEventListener('submit', (e) => {
+      if (!region) {
+        alert("Please select a region first!")
+        e.preventDefault()
+        return
+      }
+      // ensure latest region values are saved
+      update(region.start, region.end)
+    })
   </script>
 </body>
 </html>

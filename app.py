@@ -36,18 +36,36 @@ def uploaded_file(filename):
 
 @app.route("/process", methods=["POST"])
 def process_audio():
-    start = int(float(request.form["start"]) * 1000)
-    end = int(float(request.form["end"]) * 1000)
-    fade_in = int(request.form.get("fade_in", 0))
-    fade_out = int(request.form.get("fade_out", 0))
-    input_file = request.form["filename"]
+    try:
+        # Get values from form
+        start_raw = request.form.get("start", "0")
+        end_raw = request.form.get("end", "0")
+        fade_in_raw = request.form.get("fade_in", "2000")
+        fade_out_raw = request.form.get("fade_out", "2000")
 
-    input_path = os.path.join(app.config['UPLOAD_FOLDER'], input_file)
-    output_path = os.path.join(PROCESSED_FOLDER, "final.mp3")
+        app.logger.info(f"Received form data: start={start_raw}, end={end_raw}, fade_in={fade_in_raw}, fade_out={fade_out_raw}")
 
-    edit_audio(input_path, start, end, fade_in, fade_out, output_path)
+        # Convert to numbers
+        start = float(start_raw) * 1000
+        end = float(end_raw) * 1000
+        fade_in = int(fade_in_raw)
+        fade_out = int(fade_out_raw)
 
-    return send_file(output_path, as_attachment=True)
+        # Check for valid values
+        if end <= start:
+            return "Error: End time must be after start time", 400
 
-if __name__ == "__main__":
-    app.run(debug=True)
+        input_path = session.get("audio_path")  # Check if you're saving it in session
+        if not input_path:
+            return "Error: No audio loaded", 400
+
+        output_path = "static/final.mp3"
+
+        # Process audio
+        edit_audio(input_path, start, end, fade_in, fade_out, output_path)
+
+        return send_file(output_path, as_attachment=True)
+
+    except Exception as e:
+        app.logger.error(f"Error in /process: {e}", exc_info=True)
+        return f"Internal Server Error: {e}", 500
